@@ -3,25 +3,25 @@ import { fileURLToPath } from "url";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import { viteSingleFile } from "vite-plugin-singlefile";
 import { VitePWA } from "vite-plugin-pwa";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    viteSingleFile(),
+
     VitePWA({
       registerType: "autoUpdate",
       strategies: "generateSW",
+
       manifest: {
         name: "KhataX - Accounting Made Simple",
         short_name: "KhataX",
-        description: "A simple and elegant accounting application to manage your business finances",
+        description:
+          "A simple and elegant accounting application to manage your business finances",
         start_url: "/",
         scope: "/",
         display: "standalone",
@@ -29,40 +29,58 @@ export default defineConfig({
         theme_color: "#1a5ba8",
         background_color: "#ffffff",
         categories: ["business", "productivity"],
+
         icons: [
           {
-            src: "/KhataX%20192.png",
+            src: "/KhataX-192.png",
             sizes: "192x192",
             type: "image/png",
-            purpose: "any",
+            purpose: "any maskable",
           },
           {
-            src: "/KhataX%20512.png",
+            src: "/KhataX-512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any",
+            purpose: "any maskable",
           },
         ],
       },
+
       workbox: {
         globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
-        globIgnores: ["**/node_modules/**/*"],
+
         runtimeCaching: [
+          {
+            urlPattern: ({ request }) =>
+              request.destination === "document",
+            handler: "NetworkFirst",
+          },
+          {
+            urlPattern: ({ request }) =>
+              request.destination === "script" ||
+              request.destination === "style",
+            handler: "CacheFirst",
+          },
           {
             urlPattern: /^https:\/\/.*/i,
             handler: "NetworkFirst",
             options: {
-              cacheName: "runtime-cache",
+              cacheName: "api-cache",
               expiration: {
-                maxEntries: 32,
+                maxEntries: 50,
                 maxAgeSeconds: 86400,
               },
             },
           },
         ],
       },
+
+      devOptions: {
+        enabled: true,
+      },
     }),
   ],
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
